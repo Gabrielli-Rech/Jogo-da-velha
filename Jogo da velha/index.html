@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f3f3f3;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .winner {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: #4caf50;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Jogo da Velha</h1>
+    <div class="board" id="board"></div>
+    <div class="winner" id="winner"></div>
+    <button onclick="resetGame()">Reiniciar Jogo</button>
+
+    <script>
+        const board = document.getElementById('board');
+        const winnerText = document.getElementById('winner');
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+
+        // Função para criar as células do tabuleiro
+        function createBoard() {
+            if (!board) return; // Verifica se o tabuleiro existe
+            board.innerHTML = '';
+            gameBoard.forEach((cell, index) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.classList.add('cell');
+                cellDiv.dataset.index = index;
+                cellDiv.addEventListener('click', handleCellClick);
+                cellDiv.textContent = cell;
+                board.appendChild(cellDiv);
+            });
+        }
+
+        // Função para lidar com cliques nas células
+        function handleCellClick(event) {
+            const index = parseInt(event.target.dataset.index, 10); // Converte para número
+
+            if (gameBoard[index] !== '' || !gameActive) return;
+
+            gameBoard[index] = currentPlayer;
+            event.target.textContent = currentPlayer;
+            event.target.classList.add('taken');
+
+            if (checkWinner()) {
+                winnerText.textContent = `Jogador ${currentPlayer} venceu!`;
+                gameActive = false;
+                return;
+            }
+
+            if (gameBoard.every(cell => cell !== '')) {
+                winnerText.textContent = 'Empate!';
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+
+        // Função para verificar o vencedor
+        function checkWinner() {
+            const winningCombinations = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6],
+            ];
+
+            return winningCombinations.some(combination => {
+                const [a, b, c] = combination;
+                return gameBoard[a] === currentPlayer &&
+                    gameBoard[a] === gameBoard[b] &&
+                    gameBoard[a] === gameBoard[c];
+            });
+        }
+
+        // Função para reiniciar o jogo
+        function resetGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            winnerText.textContent = '';
+            createBoard();
+        }
+
+        // Inicializa o tabuleiro ao carregar a página
+        createBoard();
+    </script>
+</body>
+
+</html>
